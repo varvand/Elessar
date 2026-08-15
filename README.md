@@ -54,10 +54,9 @@ setup downloads about 3 MB of place data.
 
 ### 1. Clone the repository
 
-Replace `YOUR_REPOSITORY_URL` with the URL of this repository or your fork.
 
 ```bash
-git clone YOUR_REPOSITORY_URL
+git clone git@github.com:varvand/Elessar.git
 cd Elessar
 ```
 
