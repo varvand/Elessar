@@ -1,5 +1,7 @@
 # Elessar
 
+<img width="3600" height="2338" alt="main" src="https://github.com/user-attachments/assets/b9d69384-7b4d-4480-9460-2bb5a6623768" />
+
 Elessar is an open source situational awareness platform. It collects reports
 from public event and news feeds, enriches them with local machine learning, and
 presents the results on a live global dashboard.
