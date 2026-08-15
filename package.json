@@ -1,0 +1,45 @@
+{
+  "name": "elessar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-source situational awareness platform: global event dashboard, live OSINT ingestion, ML correlation.",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:logs": "docker compose -f infra/docker-compose.yml logs -f",
+    "infra:nuke": "docker compose -f infra/docker-compose.yml down -v",
+    "db:generate": "pnpm --filter @elessar/db generate",
+    "db:migrate": "pnpm --filter @elessar/db migrate",
+    "db:studio": "pnpm --filter @elessar/db studio",
+    "db:seed-gazetteer": "pnpm --filter @elessar/ml seed-gazetteer",
+    "ingest": "pnpm --filter @elessar/ingest dev",
+    "ingest:once": "pnpm --filter @elessar/ingest once",
+    "web": "pnpm --filter @elessar/web dev",
+    "bootstrap": "pnpm install && pnpm infra:up && pnpm db:migrate && pnpm db:seed-gazetteer && pnpm ingest:once",
+    "probe": "pnpm --filter @elessar/connectors probe"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^24.13.3",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.23.12",
+    "turbo": "^2.10.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.46.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@elessar/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Domain model, taxonomy, scoring and shared utilities. No I/O, no side effects.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./taxonomy": "./src/taxonomy.ts",
+    "./geo": "./src/geo.ts",
+    "./vector": "./src/vector.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "pino": "^10.3.1",
+    "pino-pretty": "^13.1.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "5.9.3"
+  }
+}

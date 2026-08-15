@@ -1,0 +1,98 @@
+# ---------------------------------------------------------------------------
+# Dependencies & build output
+# ---------------------------------------------------------------------------
+node_modules/
+.pnpm-store/
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------------------------------------------------------------------------
+# Secrets & local configuration
+#
+# `.env` is ignored, `.env.example` is not — that pairing is the whole contract.
+# Anything holding a key, a password, a token or a contact address belongs in
+# `.env`; anything committed must be safe for the world to read.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.local
+
+# Credential shapes, in case one is ever written to disk by mistake.
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+id_rsa*
+*credentials*.json
+*service-account*.json
+.netrc
+.npmrc
+.pgpass
+
+# ---------------------------------------------------------------------------
+# Downloaded data — large, reproducible, not source
+#
+# The gazetteer (~3 MB) and the ONNX embedding model (~90 MB) are fetched on
+# demand by `pnpm db:seed-gazetteer` and the first ingest run. Committing them
+# would bloat the repository with bytes that GeoNames and Hugging Face already
+# host, under their own licences.
+# ---------------------------------------------------------------------------
+data/
+.cache/
+
+# ---------------------------------------------------------------------------
+# Tests & coverage
+# ---------------------------------------------------------------------------
+coverage/
+.vitest-cache/
+*.lcov
+test-results/
+
+# ---------------------------------------------------------------------------
+# Logs & diagnostics
+# ---------------------------------------------------------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+next-panic-*.log
+
+# ---------------------------------------------------------------------------
+# Editor & OS noise
+# ---------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# ---------------------------------------------------------------------------
+# Agent / tooling scratch
+#
+# `.claude/launch.json` IS committed — it tells any agent how to start the dev
+# server, which is useful to a contributor. Local agent state is not.
+# ---------------------------------------------------------------------------
+.claude/*
+!.claude/launch.json
+!.claude/agents/
+.aider*
+scratch/
+tmp/

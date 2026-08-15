@@ -1,0 +1,25 @@
+{
+  "name": "@elessar/connectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pluggable source adapters for free/open event and news feeds.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "probe": "tsx src/scripts/probe.ts"
+  },
+  "dependencies": {
+    "@elessar/core": "workspace:*",
+    "fast-xml-parser": "^5.10.1",
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "5.9.3",
+    "tsx": "^4.23.12"
+  }
+}

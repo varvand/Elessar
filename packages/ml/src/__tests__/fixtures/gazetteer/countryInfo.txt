@@ -1,0 +1,35 @@
+# GeoNames countryInfo.txt fixture.
+#
+# Columns: ISO ISO3 ISO-Numeric fips Country Capital Area Population Continent
+#          tld CurrencyCode CurrencyName Phone PostalFormat PostalRegex Languages
+#          geonameid neighbours EquivalentFipsCode
+#
+# The `fips` column (4th) is the point of this file: it is the authoritative
+# FIPS 10-4 -> ISO 3166-1 crosswalk GDELT locations need. The rows below are
+# chosen to include the pairs that actively disagree, which is where the real
+# mislabelling bug lived:
+#   FIPS SG = Senegal   but ISO SG = Singapore
+#   FIPS CH = China     but ISO CH = Switzerland
+#   FIPS BF = Bahamas   but ISO BF = Burkina Faso
+#ISO	ISO3	ISO-Numeric	fips	Country	Capital	Area(in sq km)	Population	Continent	tld	CurrencyCode	CurrencyName	Phone	Postal Code Format	Postal Code Regex	Languages	geonameid	neighbours	EquivalentFipsCode
+ID	IDN	360	ID	Indonesia	Jakarta	1919440	273523615	AS	.id	IDR	Rupiah	62			id,en,nl	1643084	TL,MY,PG
+SN	SEN	686	SG	Senegal	Dakar	196190	16743927	AF	.sn	XOF	Franc	221	#####	^(\d{5})$	fr-SN,wo	2245662	GN,MR,GW,GM,ML
+SG	SGP	702	SN	Singapore	Singapore	692.7	5850342	AS	.sg	SGD	Dollar	65	######	^(\d{6})$	cmn,en-SG,ms-SG	1880251
+CN	CHN	156	CH	China	Beijing	9596960	1439323776	AS	.cn	CNY	Yuan Renminbi	86	######	^(\d{6})$	zh-CN	1814991	TJ,KZ,MN,IN,NP
+CH	CHE	756	SZ	Switzerland	Bern	41290	8654622	EU	.ch	CHF	Franc	41	####	^(\d{4})$	de-CH,fr-CH,it-CH	2658434	IT,DE,FR,AT,LI
+BS	BHS	44	BF	Bahamas	Nassau	13940	393244	NA	.bs	BSD	Dollar	1-242			en-BS	3572887
+BF	BFA	854	UV	Burkina Faso	Ouagadougou	274200	20903273	AF	.bf	XOF	Franc	226			fr-BF,mos	2361809	NE,BJ,GH,CI,TG,ML
+BR	BRA	76	BR	Brazil	Brasilia	8511965	212559417	SA	.br	BRL	Real	55	#####-###	^(\d{8})$	pt-BR,es,en	3469034	SR,PE,BO,UY,GY
+GB	GBR	826	UK	United Kingdom	London	244820	67886011	EU	.uk	GBP	Pound	44	@# #@@	^(...)$	en-GB,cy-GB,gd	2635167	IE
+US	USA	840	US	United States	Washington	9629091	331002651	NA	.us	USD	Dollar	1	#####-####	^\d{5}(-\d{4})?$	en-US,es-US	6252001	CA,MX,CU
+UA	UKR	804	UP	Ukraine	Kyiv	603700	43733762	EU	.ua	UAH	Hryvnia	380	#####	^(\d{5})$	uk,ru-UA,pl	690791	PL,MD,HU,SK,BY,RO,RU
+KE	KEN	404	KE	Kenya	Nairobi	582650	53771296	AF	.ke	KES	Shilling	254	#####	^(\d{5})$	en-KE,sw-KE	192950	ET,TZ,SS,SO,UG
+IT	ITA	380	IT	Italy	Rome	301230	60461826	EU	.it	EUR	Euro	39	#####	^(\d{5})$	it-IT,de-IT,fr-IT	3175395	CH,VA,SI,SM,FR,AT
+IQ	IRQ	368	IZ	Iraq	Baghdad	437072	40222493	AS	.iq	IQD	Dinar	964	#####	^(\d{5})$	ar-IQ,ku	99237	SY,SA,IR,JO,TR,KW
+LB	LBN	422	LE	Lebanon	Beirut	10400	6825445	AS	.lb	LBP	Pound	961	#### ####		ar-LB,fr-LB,en	272103	SY,IL
+ZW	ZWE	716	ZI	Zimbabwe	Harare	390580	14862924	AF	.zw	ZWL	Dollar	263			en-ZW,sn,nr	878675	ZA,MZ,BW,ZM
+MY	MYS	458	MY	Malaysia	Kuala Lumpur	329750	32365999	AS	.my	MYR	Ringgit	60	#####	^(\d{5})$	ms-MY,en,zh	1733045	BN,TH,ID
+NZ	NZL	554	NZ	New Zealand	Wellington	268680	4822233	OC	.nz	NZD	Dollar	64	####	^(\d{4})$	en-NZ,mi	2186224
+TO	TON	776	TN	Tonga	Nuku'alofa	748	105695	OC	.to	TOP	Pa'anga	676			to,en-TO	4032283
+RU	RUS	643	RS	Russia	Moscow	17100000	145934462	EU	.ru	RUB	Ruble	7	######	^(\d{6})$	ru,tt,xal	2017370	GE,CN,BY,UA,KZ,LV
+IN	IND	356	IN	India	New Delhi	3287590	1380004385	AS	.in	INR	Rupee	91	### ###	^(\d{6})$	en-IN,hi,bn	1269750	CN,NP,MM,BT,PK,BD

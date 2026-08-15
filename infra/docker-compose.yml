@@ -1,0 +1,38 @@
+name: elessar
+
+services:
+  postgres:
+    # Bundles pgvector, which upstream postgres images do not ship.
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: elessar
+      POSTGRES_PASSWORD: elessar
+      POSTGRES_DB: elessar
+      # Deterministic collation so ORDER BY matches across dev machines.
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+    ports:
+      # 5433 on the host: 5432 is commonly taken by a native Postgres install.
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U elessar -d elessar']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    command:
+      # Modest tuning for the write-heavy ingest workload on a dev laptop.
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=32MB
+      - -c
+      - maintenance_work_mem=256MB
+      - -c
+      - max_parallel_workers_per_gather=2
+
+volumes:
+  pgdata:

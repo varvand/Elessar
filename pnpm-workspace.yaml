@@ -1,0 +1,11 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# transformers.js pulls onnxruntime-node, which needs its postinstall to fetch
+# native binaries. sharp is an optional transformers.js peer we do not use.
+onlyBuiltDependencies:
+  - onnxruntime-node
+  - esbuild
+  - '@tailwindcss/oxide'
+  - sharp

@@ -1,0 +1,351 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   Elessar design tokens.
+
+   Dark-first by intent: this is a monitoring console, most often read in a dim
+   room beside other dark tooling, and a dark ground makes a luminous globe the
+   focal point instead of fighting it. Light mode is fully supported — every
+   colour below is defined in both modes — but dark is the default.
+
+   Every categorical colour here was machine-validated, not chosen by eye:
+   colourblind separation, a normal-vision distinctness floor, a lightness band
+   and contrast against these exact surfaces. See docs/design.md for the
+   validator output. Do not substitute hexes here without re-running it —
+   "looks fine to me" is precisely the failure mode the check exists to catch.
+   =========================================================================== */
+
+@layer base {
+  :root {
+    color-scheme: dark;
+
+    /* --- Surfaces: a cool near-black, layered by elevation --------------- */
+    --plane: #080b10;        /* page ground, behind everything */
+    --surface-1: #0e131b;    /* primary panels */
+    --surface-2: #121821;    /* raised panels — the validated chart surface */
+    --surface-3: #18202b;    /* hover / active rows */
+    --surface-inset: #0a0e14;
+
+    /* --- Ink ------------------------------------------------------------- */
+    --ink-primary: #f2f5f8;
+    --ink-secondary: #9daabb;
+    --ink-muted: #64748b;
+
+    /* --- Lines ----------------------------------------------------------- */
+    --line-hairline: #1c2531;
+    --line-strong: #26313f;
+    --line-focus: #3987e5;
+
+    /* --- Categorical: the five category groups -------------------------
+       Validated ORDER (this exact sequence is the CVD-safety mechanism —
+       reordering invalidates the result):
+         blue → orange → aqua → violet → yellow
+       Dark: worst adjacent CVD ΔE 9.4, normal-vision ΔE 24.6, all ≥3:1.
+       Stack charts must render groups in this order.                      */
+    --group-governance: #3987e5; /* slot 1 — political, diplomacy, economy */
+    --group-security: #d95926;   /* slot 2 — conflict, terror, unrest, cyber */
+    --group-human: #199e70;      /* slot 3 — humanitarian, health */
+    --group-domain: #9085e9;     /* slot 4 — infra, maritime, aviation, space */
+    --group-hazard: #c98500;     /* slot 5 — seismic, weather, wildfire */
+
+    /* --- Status: severity bands. Reserved; never reused as a series colour.
+       Severity is a *state*, not an arbitrary magnitude, which is why it wears
+       the status palette rather than a sequential ramp. Always shipped with a
+       text label, never colour alone.                                      */
+    --sev-critical: #d03b3b;
+    --sev-serious: #ec835a;
+    --sev-elevated: #fab219;
+    --sev-routine: #5b7089;
+
+    /* --- Globe ----------------------------------------------------------- */
+    --globe-ocean: #0b111a;
+    --globe-land: #1b2534;
+    --globe-land-stroke: #2d3a4d;
+    --globe-atmosphere: #3987e5;
+    --globe-graticule: #16202c;
+
+    /* --- Chart chrome ---------------------------------------------------- */
+    --grid-line: #1a2230;
+    --axis-line: #26313f;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+
+    /* Panel depth. Kept subtle — a console should read as flat instrument
+       surfaces, not as floating cards. */
+    --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.5);
+    --glow-focus: 0 0 0 1px rgb(57 135 229 / 0.5), 0 0 16px -2px rgb(57 135 229 / 0.35);
+  }
+
+  /* Light mode. Categorical hues are re-stepped for a light surface — not the
+     same hexes dimmed, which is what makes an "automatic flip" look wrong.
+     Validator note: aqua and yellow fall below 3:1 on this surface, so the
+     relief rule applies — every chart using them carries a legend AND direct
+     labels, and the feed is itself a table view. */
+  :root[data-theme='light'] {
+    color-scheme: light;
+
+    --plane: #f4f5f7;
+    --surface-1: #ffffff;
+    --surface-2: #fbfbfa;
+    --surface-3: #f1f3f6;
+    --surface-inset: #eef0f4;
+
+    --ink-primary: #0b1017;
+    --ink-secondary: #4a5567;
+    --ink-muted: #6b7688;
+
+    --line-hairline: #e2e6ec;
+    --line-strong: #cfd5de;
+    --line-focus: #2a78d6;
+
+    --group-governance: #2a78d6;
+    --group-security: #eb6834;
+    --group-human: #1baf7a;
+    --group-domain: #4a3aa7;
+    --group-hazard: #eda100;
+
+    --sev-critical: #c62f2f;
+    --sev-serious: #d2683c;
+    --sev-elevated: #b07b00;
+    --sev-routine: #78889c;
+
+    --globe-ocean: #dde5ef;
+    --globe-land: #ffffff;
+    --globe-land-stroke: #b9c4d2;
+    --globe-atmosphere: #2a78d6;
+    --globe-graticule: #e6ebf1;
+
+    --grid-line: #e8ebf0;
+    --axis-line: #cfd5de;
+
+    --shadow-panel: 0 1px 2px rgb(11 16 23 / 0.06), 0 8px 24px -14px rgb(11 16 23 / 0.14);
+  }
+
+  * {
+    border-color: var(--line-hairline);
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--plane);
+    color: var(--ink-primary);
+    font-family:
+      system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+  }
+
+  /* Keyboard focus must be unmistakable in a dense console. */
+  :focus-visible {
+    outline: 2px solid var(--line-focus);
+    outline-offset: 1px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--ink-muted);
+  }
+}
+
+@theme inline {
+  --color-plane: var(--plane);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-inset: var(--surface-inset);
+
+  --color-ink: var(--ink-primary);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+
+  --color-hairline: var(--line-hairline);
+  --color-line-strong: var(--line-strong);
+
+  --color-governance: var(--group-governance);
+  --color-security: var(--group-security);
+  --color-human: var(--group-human);
+  --color-domain: var(--group-domain);
+  --color-hazard: var(--group-hazard);
+
+  --color-sev-critical: var(--sev-critical);
+  --color-sev-serious: var(--sev-serious);
+  --color-sev-elevated: var(--sev-elevated);
+  --color-sev-routine: var(--sev-routine);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+}
+
+@layer components {
+  /* A console panel: flat instrument surface with a hairline ring. */
+  .panel {
+    background: var(--surface-1);
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-lg);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--line-hairline);
+    min-height: 38px;
+  }
+
+  /* Section eyebrow. Uppercase + tracking reads as instrument labelling and
+     keeps headers from competing with data for attention. */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .mono {
+    font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Columns of figures must align vertically; prose figures must not. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line-hairline);
+    background: var(--surface-2);
+    color: var(--ink-secondary);
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 120ms ease,
+      color 120ms ease,
+      border-color 120ms ease;
+  }
+  .btn:hover {
+    background: var(--surface-3);
+    color: var(--ink-primary);
+    border-color: var(--line-strong);
+  }
+  .btn[data-active='true'] {
+    background: color-mix(in oklab, var(--line-focus) 18%, var(--surface-2));
+    border-color: color-mix(in oklab, var(--line-focus) 55%, transparent);
+    color: var(--ink-primary);
+  }
+
+  /* Live-status dot. `prefers-reduced-motion` is honoured below — a pulsing
+     dot is decoration, and decoration must never be mandatory. */
+  .pulse-dot {
+    position: relative;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--sev-critical);
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    border: 1px solid var(--sev-critical);
+    animation: elessar-pulse 2s ease-out infinite;
+  }
+
+  @keyframes elessar-pulse {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--surface-2) 25%,
+      var(--surface-3) 50%,
+      var(--surface-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: elessar-shimmer 1.4s linear infinite;
+  }
+
+  @keyframes elessar-shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  .row-enter {
+    animation: elessar-row-in 300ms ease-out;
+  }
+
+  @keyframes elessar-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

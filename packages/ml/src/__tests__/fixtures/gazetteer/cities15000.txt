@@ -1,0 +1,22 @@
+1642911	Ende	Ende	Ende,Endeh	-8.8432	121.6624	P	PPL	ID		20			60717	0	42	Asia/Makassar	2019-09-05
+1638690	Timon	Timon	Flores,Timon	-5.0942	-42.8367	P	PPL	BR		13			155460	0	60	America/Fortaleza	2019-05-11
+3399415	Fortaleza	Fortaleza	For,Fortaleza	-3.7172	-38.5433	P	PPLA	BR		06			2400000	0	21	America/Fortaleza	2019-07-01
+2653265	Frome	Frome	From,Frome	51.2333	-2.3167	P	PPL	GB		ENG			26203	0	60	Europe/London	2018-02-05
+4184530	Anderson	Anderson	And,Anderson	34.5034	-82.6501	P	PPLA2	US		SC			27335	0	200	America/New_York	2017-05-23
+94787	Hit	Hīt	Hit,Heet	33.6416	42.8250	P	PPL	IQ		01			31901	0	57	Asia/Baghdad	2012-01-14
+703448	Kyiv	Kyiv	Kiev,Kiyev,Kijow	50.4547	30.5238	P	PPLC	UA		30			2797553	0	187	Europe/Kiev	2020-06-01
+184745	Nairobi	Nairobi	Nairobi City	-1.2833	36.8167	P	PPLC	KE		110			2750547	0	1728	Africa/Nairobi	2019-09-05
+3169070	Rome	Roma	Rome,Roma	41.8919	12.5113	P	PPLC	IT		07			2318895	0	20	Europe/Rome	2020-05-01
+5128581	New York City	New York City	New York,NYC	40.7143	-74.0060	P	PPL	US		NY			8175133	0	10	America/New_York	2019-09-05
+5134086	York	York	York	40.8676	-76.9861	P	PPL	US		PA			15000	0	100	America/New_York	2017-05-23
+2643743	London	London	Londres	51.5085	-0.1257	P	PPLC	GB		ENG			7556900	0	25	Europe/London	2020-05-01
+4361094	Lebanon	Lebanon	Lebanon	40.3409	-76.4113	P	PPLA2	US		PA			30262	0	140	America/New_York	2017-05-23
+276781	Beirut	Bayrut	Beirut,Beyrouth	33.8938	35.5018	P	PPLC	LB		04			1916100	0	56	Asia/Beirut	2019-09-05
+1642858	Labuan Bajo	Labuan Bajo	Labuanbajo	-8.4964	119.8877	P	PPL	ID		20			15000	0	10	Asia/Makassar	2019-01-01
+1213855	Pematangsiantar	Pematangsiantar	Siantar	2.9595	99.0687	P	PPL	ID		26			234885	0	400	Asia/Jakarta	2019-01-01
+2183507	Wellington	Wellington	Wellington	-41.2866	174.7756	P	PPLC	NZ		G2			381900	0	31	Pacific/Auckland	2019-09-05
+2110384	Nuku	Nukuʻalofa	Nukualofa	-21.1394	-175.2018	P	PPLC	TO		03			22400	0	4	Pacific/Tongatapu	2019-01-01
+1735161	Kuala Lumpur	Kuala Lumpur	KL	3.1412	101.6865	P	PPLC	MY		14			1453975	0	56	Asia/Kuala_Lumpur	2019-09-05
+524901	Moscow	Moskva	Moscow,Moskva	55.7522	37.6156	P	PPLC	RU		48			10381222	0	151	Europe/Moscow	2020-05-01
+498817	Saint Petersburg	Sankt-Peterburg	Petersburg,Leningrad	59.9391	30.3161	P	PPLC	RU		66			5351935	0	11	Europe/Moscow	2020-05-01
+4487042	Petersburg	Petersburg	Petersburg	37.2279	-77.4019	P	PPL	US		VA			32420	0	40	America/New_York	2017-05-23
