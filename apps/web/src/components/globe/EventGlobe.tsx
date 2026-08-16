@@ -97,8 +97,9 @@ export function EventGlobe({
         const world = (await import('world-atlas/countries-110m.json')).default as unknown;
         const collection = topojson.feature(
           world as Parameters<typeof topojson.feature>[0],
-          (world as { objects: { countries: unknown } }).objects
-            .countries as Parameters<typeof topojson.feature>[1],
+          (world as { objects: { countries: unknown } }).objects.countries as Parameters<
+            typeof topojson.feature
+          >[1],
         ) as unknown as FeatureCollection<Geometry>;
         if (!cancelled) setCountries(collection.features);
       } catch (error) {
@@ -131,25 +132,27 @@ export function EventGlobe({
 
   // --- Points ---------------------------------------------------------------
   const points = useMemo<PointDatum[]>(() => {
-    return events
-      .filter((event) => event.lat !== null && event.lon !== null)
-      .map((event) => {
-        const band = severityBand(event.severity);
-        return {
-          id: event.id,
-          lat: event.lat as number,
-          lng: event.lon as number,
-          // Square-rooted so area, not radius, tracks severity — radius scaling
-          // exaggerates large values roughly quadratically to the eye.
-          size: 0.16 + Math.sqrt(event.severity / 100) * 0.62,
-          color: severityHex[band],
-          severity: event.severity,
-          event,
-        };
-      })
-      // Paint low severity first so critical pins are never buried by routine
-      // ones at the same location.
-      .sort((a, b) => a.severity - b.severity);
+    return (
+      events
+        .filter((event) => event.lat !== null && event.lon !== null)
+        .map((event) => {
+          const band = severityBand(event.severity);
+          return {
+            id: event.id,
+            lat: event.lat as number,
+            lng: event.lon as number,
+            // Square-rooted so area, not radius, tracks severity — radius scaling
+            // exaggerates large values roughly quadratically to the eye.
+            size: 0.16 + Math.sqrt(event.severity / 100) * 0.62,
+            color: severityHex[band],
+            severity: event.severity,
+            event,
+          };
+        })
+        // Paint low severity first so critical pins are never buried by routine
+        // ones at the same location.
+        .sort((a, b) => a.severity - b.severity)
+    );
   }, [events, severityHex]);
 
   const criticalRings = useMemo(
@@ -262,7 +265,7 @@ export function EventGlobe({
 
       {hovered && <GlobeTooltip point={hovered} />}
 
-      <GlobeLegend theme={theme} />
+      <GlobeLegend theme={theme} shifted={selectedId !== null} />
 
       {/* Pin count, so an empty globe is legibly "no matching events" rather
           than looking like a failed load. */}
@@ -303,9 +306,7 @@ function GlobeTooltip({ point }: { point: PointDatum }) {
           </span>
           <span className="eyebrow text-ink-muted tabular">{point.severity}</span>
         </div>
-        <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-ink">
-          {point.event.title}
-        </p>
+        <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-ink">{point.event.title}</p>
         {point.event.placeName && (
           <p className="mt-0.5 truncate text-[11px] text-ink-muted">{point.event.placeName}</p>
         )}
@@ -320,7 +321,7 @@ function GlobeTooltip({ point }: { point: PointDatum }) {
  * Always present, because severity is encoded in colour and an unlabelled colour
  * scale is not an encoding — it is decoration.
  */
-function GlobeLegend({ theme }: { theme: 'dark' | 'light' }) {
+function GlobeLegend({ theme, shifted }: { theme: 'dark' | 'light'; shifted: boolean }) {
   const hex = theme === 'dark' ? SEVERITY_HEX_DARK : SEVERITY_HEX_LIGHT;
   const bands: { band: keyof typeof hex; label: string; range: string }[] = [
     { band: 'critical', label: 'Critical', range: '70+' },
@@ -330,16 +331,16 @@ function GlobeLegend({ theme }: { theme: 'dark' | 'light' }) {
   ];
 
   return (
-    <div className="pointer-events-none absolute right-3 top-3 z-10">
+    <div
+      className={`pointer-events-none absolute top-3 z-10 transition-[right] duration-300 ease-out ${
+        shifted ? 'right-14' : 'right-3'
+      }`}
+    >
       <div className="flex flex-col gap-1.5 rounded-md border border-hairline bg-[color-mix(in_oklab,var(--surface-1)_86%,transparent)] px-2.5 py-2">
         <span className="eyebrow">Severity</span>
         {bands.map(({ band, label, range }) => (
           <div key={band} className="flex items-center gap-2">
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ background: hex[band] }}
-              aria-hidden
-            />
+            <span className="h-2 w-2 rounded-full" style={{ background: hex[band] }} aria-hidden />
             <span className="text-[10.5px] text-ink-secondary">{label}</span>
             <span className="ml-auto text-[10px] text-ink-muted tabular">{range}</span>
           </div>
@@ -372,8 +373,5 @@ interface GlobeInstance {
     minDistance: number;
     maxDistance: number;
   };
-  pointOfView(
-    view: { lat: number; lng: number; altitude: number },
-    durationMs?: number,
-  ): void;
+  pointOfView(view: { lat: number; lng: number; altitude: number }, durationMs?: number): void;
 }
