@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { MeshPhongMaterial } from 'three';
 import * as topojson from 'topojson-client';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import type { EventDto } from '@/lib/api-types';
@@ -57,12 +58,14 @@ interface PointDatum {
 
 const GLOBE_COLORS = {
   dark: {
+    background: '#080d14',
     ocean: '#0b111a',
     land: '#1b2534',
     landStroke: '#33415a',
     atmosphere: '#3987e5',
   },
   light: {
+    background: '#edf2f7',
     ocean: '#dde5ef',
     land: '#ffffff',
     landStroke: '#aab6c6',
@@ -85,6 +88,20 @@ export function EventGlobe({
 
   const palette = GLOBE_COLORS[theme];
   const severityHex = theme === 'dark' ? SEVERITY_HEX_DARK : SEVERITY_HEX_LIGHT;
+  const globeMaterial = useMemo(
+    () =>
+      new MeshPhongMaterial({
+        color: palette.ocean,
+        emissive: palette.ocean,
+        emissiveIntensity: 0.08,
+        shininess: 0.1,
+        transparent: false,
+        opacity: 1,
+      }),
+    [palette.ocean],
+  );
+
+  useEffect(() => () => globeMaterial.dispose(), [globeMaterial]);
 
   // --- Country outlines -----------------------------------------------------
   // Loaded from the bundled world-atlas TopoJSON and converted once. 110m
@@ -222,7 +239,7 @@ export function EventGlobe({
           ref={globeRef as never}
           width={size.width}
           height={size.height}
-          backgroundColor="rgba(0,0,0,0)"
+          backgroundColor={palette.background}
           // A flat colour rather than an image: no external asset, and the ocean
           // stays darker than any pin.
           globeImageUrl={undefined as unknown as string}
@@ -231,14 +248,7 @@ export function EventGlobe({
           showAtmosphere
           atmosphereColor={palette.atmosphere}
           atmosphereAltitude={0.14}
-          globeMaterial={
-            {
-              color: palette.ocean,
-              emissive: palette.ocean,
-              emissiveIntensity: 0.08,
-              shininess: 0.1,
-            } as never
-          }
+          globeMaterial={globeMaterial}
           polygonsData={countries}
           polygonCapColor={() => palette.land}
           polygonSideColor={() => 'rgba(0,0,0,0)'}
