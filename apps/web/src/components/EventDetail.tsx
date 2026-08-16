@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import type { EventDetailDto, EventDto } from '@/lib/api-types';
+import type { EventMarketImpact } from '@/lib/market';
+import { directionLabel } from './market/MarketImpactFeed';
 import {
   colorForCategory,
   formatCoordinates,
@@ -30,13 +32,24 @@ import {
 
 interface EventDetailProps {
   event: EventDto;
+  marketImpact?: EventMarketImpact | null;
+  marketExpanded?: boolean;
   onClose: () => void;
   onSelectRelated: (eventId: string) => void;
 }
 
-export function EventDetail({ event, onClose, onSelectRelated }: EventDetailProps) {
+export function EventDetail({
+  event,
+  marketImpact,
+  marketExpanded = false,
+  onClose,
+  onSelectRelated,
+}: EventDetailProps) {
   const [detail, setDetail] = useState<EventDetailDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [marketOpen, setMarketOpen] = useState(marketExpanded);
+
+  useEffect(() => setMarketOpen(marketExpanded), [event.id, marketExpanded]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -93,18 +106,17 @@ export function EventDetail({ event, onClose, onSelectRelated }: EventDetailProp
             </span>
             <span className="eyebrow">{STATUS_LABELS[event.status] ?? event.status}</span>
           </div>
-          <h2 className="mt-1.5 text-[15px] font-semibold leading-snug text-ink">
-            {event.title}
-          </h2>
+          <h2 className="mt-1.5 text-[15px] font-semibold leading-snug text-ink">{event.title}</h2>
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn shrink-0"
-          aria-label="Close details"
-        >
-          <svg viewBox="0 0 14 14" className="h-3 w-3" stroke="currentColor" strokeWidth={1.7} aria-hidden>
+        <button type="button" onClick={onClose} className="btn shrink-0" aria-label="Close details">
+          <svg
+            viewBox="0 0 14 14"
+            className="h-3 w-3"
+            stroke="currentColor"
+            strokeWidth={1.7}
+            aria-hidden
+          >
             <path d="M3 3l8 8M11 3l-8 8" strokeLinecap="round" />
           </svg>
         </button>
@@ -140,11 +152,7 @@ export function EventDetail({ event, onClose, onSelectRelated }: EventDetailProp
           <dl className="flex flex-col gap-1.5 text-[11.5px]">
             <Row label="Location" value={event.placeName ?? 'Unlocated'} />
             {event.lat !== null && event.lon !== null && (
-              <Row
-                label="Coordinates"
-                value={formatCoordinates(event.lat, event.lon)}
-                mono
-              />
+              <Row label="Coordinates" value={formatCoordinates(event.lat, event.lon)} mono />
             )}
             {/* Precision is stated explicitly: a country-centroid pin must not be
                 mistaken for a surveyed position. */}
@@ -167,10 +175,49 @@ export function EventDetail({ event, onClose, onSelectRelated }: EventDetailProp
         {event.summary && (
           <section className="border-b border-hairline px-3.5 py-3">
             <h3 className="eyebrow">Summary</h3>
-            <p className="mt-1.5 text-[12px] leading-relaxed text-ink-secondary">
-              {event.summary}
-            </p>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-ink-secondary">{event.summary}</p>
           </section>
+        )}
+
+        {marketImpact && (
+          <details
+            className="border-b border-hairline px-3.5 py-3"
+            open={marketOpen}
+            onToggle={(toggleEvent) => setMarketOpen(toggleEvent.currentTarget.open)}
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+              <span className="eyebrow">Potential market impact</span>
+              <span className="text-[10.5px] text-ink-muted tabular">
+                {marketImpact.materiality} materiality · {marketImpact.confidence} confidence
+              </span>
+            </summary>
+            <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-muted">
+              Rule-based exposure analysis, not a trade recommendation. Event severity and market
+              materiality are scored independently.
+            </p>
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {marketImpact.exposures.map((exposure) => (
+                <li
+                  key={exposure.id}
+                  className="rounded-md border border-hairline bg-surface-2 px-2.5 py-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11.5px] font-medium text-ink">{exposure.label}</span>
+                    <span className="chip">{directionLabel(exposure.direction)}</span>
+                    <span className="ml-auto text-[10px] text-ink-muted tabular">
+                      {exposure.materiality} · {exposure.confidence} conf
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[10.5px] leading-relaxed text-ink-secondary">
+                    {exposure.rationale}
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-ink-muted">
+                    {exposure.channel} channel · {exposure.horizon}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
 
         {/* --- Evidence --- */}

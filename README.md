@@ -23,7 +23,12 @@ key, and the embedding and classification pipeline runs locally.
 - Scores severity and confidence independently
 - Detects unusual activity against regional baselines
 - Shows events on a globe alongside a feed, timeline, alerts, and source health
+- Provides an optional Market lens with ranked and explainable exposure channels
 - Preserves the observations behind each event for traceability
+
+The Market lens estimates where an event may matter through supply, policy,
+security, operations, or macro channels. It keeps event severity separate from
+market materiality and does not present buy or sell recommendations.
 
 ## How it works
 
@@ -55,7 +60,6 @@ setup downloads about 3 MB of place data.
 ## Run Elessar locally
 
 ### 1. Clone the repository
-
 
 ```bash
 git clone git@github.com:varvand/Elessar.git
@@ -182,16 +186,19 @@ comfortable losing the local data.
 
 Elessar currently uses the following public sources:
 
-| Source                                                                 | Data                                                               |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [GDELT 2.0](https://www.gdeltproject.org/)                             | Global news events with locations and conflict metadata            |
-| [USGS](https://earthquake.usgs.gov/earthquakes/feed/)                  | Significant earthquakes and earthquakes at magnitude 4.5 or higher |
-| [GDACS](https://www.gdacs.org/)                                        | Multi-hazard alerts and humanitarian impact estimates              |
-| [NASA EONET](https://eonet.gsfc.nasa.gov/)                             | Curated natural events with satellite references                   |
-| [NOAA and NWS](https://www.weather.gov/documentation/services-web-api) | Severe weather alerts in the United States                         |
-| [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/)                    | Active fire detections with a free optional key                    |
-| BBC, Al Jazeera, DW, France 24, and UN News                            | International reporting through RSS feeds                          |
-| [GeoNames](https://www.geonames.org/)                                  | Place names and country reference data                             |
+| Source                                                                              | Data                                                               |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [GDELT 2.0](https://www.gdeltproject.org/)                                          | Global news events with locations and conflict metadata            |
+| [USGS](https://earthquake.usgs.gov/earthquakes/feed/)                               | Significant earthquakes and earthquakes at magnitude 4.5 or higher |
+| [GDACS](https://www.gdacs.org/)                                                     | Multi-hazard alerts and humanitarian impact estimates              |
+| [NASA EONET](https://eonet.gsfc.nasa.gov/)                                          | Curated natural events with satellite references                   |
+| [NOAA and NWS](https://www.weather.gov/documentation/services-web-api)              | Severe weather alerts in the United States                         |
+| [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/)                                 | Active fire detections with a free optional key                    |
+| [ReliefWeb](https://reliefweb.int/)                                                 | Humanitarian reports from UN OCHA and partner organizations        |
+| [NOAA SWPC](https://www.swpc.noaa.gov/)                                             | Space weather watches, warnings, alerts, and summaries             |
+| [US Treasury OFAC](https://ofac.treasury.gov/recent-actions/sanctions-list-updates) | Official sanctions list updates                                    |
+| BBC, Al Jazeera, DW, France 24, and UN News                                         | International reporting through RSS feeds                          |
+| [GeoNames](https://www.geonames.org/)                                               | Place names and country reference data                             |
 
 Source attribution remains visible in the dashboard. Data from each provider
 continues to be governed by that provider's license and terms.

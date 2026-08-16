@@ -151,7 +151,10 @@ function parseCities(text: string): { places: Place[]; nameIndex: Map<string, Na
       lon,
       countryCode: (f[8] ?? '').toUpperCase(),
       admin1: f[10] ?? '',
-      population: Number.parseInt(f[14] ?? '0', 10) || 0,
+      // GeoNames has 19 columns and stores population at index 14. Small test
+      // and downstream extracts occasionally omit the empty admin4 column,
+      // producing an otherwise valid 18-column row with population at 13.
+      population: Number.parseInt(f[f.length >= 19 ? 14 : 13] ?? '0', 10) || 0,
     });
 
     addName(f[1] ?? '', index, true);
@@ -165,13 +168,17 @@ function parseCities(text: string): { places: Place[]; nameIndex: Map<string, Na
     }
   }
 
-  // Order candidates: primary names before alternates, then by population, so
-  // an ambiguous bare name resolves to the most prominent plausible place.
+  // Order candidates by prominence, then prefer a primary spelling to break a
+  // tie. Explicit place hints often use an alternate name, and a major city is
+  // a safer default than a much smaller exact-name collision.
   for (const entries of nameIndex.values()) {
     if (entries.length > 1) {
       entries.sort((a, b) => {
+        const populationDelta =
+          (places[b.placeIndex]?.population ?? 0) - (places[a.placeIndex]?.population ?? 0);
+        if (populationDelta !== 0) return populationDelta;
         if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1;
-        return (places[b.placeIndex]?.population ?? 0) - (places[a.placeIndex]?.population ?? 0);
+        return 0;
       });
       if (entries.length > 12) entries.length = 12;
     }
@@ -441,7 +448,7 @@ export function findNearestPlace(point: GeoPoint, maxKm = 200): Place | null {
   const lonSpan = Math.round(360 / INDEX_CELL_DEG);
   const halfSpan = lonSpan / 2;
   const wrapLonBin = (bin: number): number =>
-    (((bin + halfSpan) % lonSpan) + lonSpan) % lonSpan - halfSpan;
+    ((((bin + halfSpan) % lonSpan) + lonSpan) % lonSpan) - halfSpan;
 
   for (let ring = 0; ring <= maxRing; ring += 1) {
     for (let dLat = -ring; dLat <= ring; dLat += 1) {

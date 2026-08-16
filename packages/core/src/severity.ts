@@ -73,7 +73,7 @@ const INTENSITY_CURVES: Record<string, (magnitude: number) => number> = {
   'gdelt.events': (g) => {
     const conflict = clamp01((-g + 10) / 20); // 0 at +10, 1 at -10
     const notability = Math.abs(g) / 10; // cooperation still registers
-    return clamp01(0.75 * conflict + 0.25 * notability);
+    return clamp01(0.6 * conflict + 0.4 * notability);
   },
 
   /**
@@ -95,6 +95,9 @@ const INTENSITY_CURVES: Record<string, (magnitude: number) => number> = {
 
   /** NASA EONET has no magnitude; treat as mid-intensity. */
   'nasa.eonet': () => 0.5,
+
+  /** NOAA G, R and S space-weather scales, normalized from 1 .. 5. */
+  'noaa.swpc': (level) => clamp01((level - 0.5) / 4.5),
 };
 
 /** Fallback when a source has no registered curve or supplies no magnitude. */

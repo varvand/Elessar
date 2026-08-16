@@ -5,6 +5,9 @@ import { gdacsConnector } from './gdacs';
 import { nwsAlertsConnector } from './nws';
 import { eonetConnector } from './eonet';
 import { firmsConnector } from './firms';
+import { reliefWebConnector } from './reliefweb';
+import { swpcConnector } from './swpc';
+import { ofacConnector } from './ofac';
 import { newsConnectors } from './rss';
 
 export { createHttpClient, resetHttpState, HttpError } from './http';
@@ -15,6 +18,9 @@ export { gdacsConnector } from './gdacs';
 export { nwsAlertsConnector } from './nws';
 export { eonetConnector } from './eonet';
 export { firmsConnector } from './firms';
+export { reliefWebConnector } from './reliefweb';
+export { swpcConnector } from './swpc';
+export { ofacConnector } from './ofac';
 
 /**
  * The source registry.
@@ -37,6 +43,11 @@ export const ALL_CONNECTORS: SourceDefinition[] = [
   eonetConnector,
   nwsAlertsConnector,
   firmsConnector,
+
+  // Official humanitarian, infrastructure-risk and economic policy sources.
+  reliefWebConnector,
+  swpcConnector,
+  ofacConnector,
 
   // Editorial news feeds — narrative context around the machine-coded events.
   ...newsConnectors,

@@ -20,3 +20,5 @@
 524901	Moscow	Moskva	Moscow,Moskva	55.7522	37.6156	P	PPLC	RU		48			10381222	0	151	Europe/Moscow	2020-05-01
 498817	Saint Petersburg	Sankt-Peterburg	Petersburg,Leningrad	59.9391	30.3161	P	PPLC	RU		66			5351935	0	11	Europe/Moscow	2020-05-01
 4487042	Petersburg	Petersburg	Petersburg	37.2279	-77.4019	P	PPL	US		VA			32420	0	40	America/New_York	2017-05-23
+890299	Harare	Harare	Harare	-17.82772	31.05337	P	PPLC	ZW		10				1542813	0	1490	Africa/Harare	2024-01-01
+2253354	Dakar	Dakar	Dakar	14.6937	-17.44406	P	PPLC	SN		01				2476400	0	12	Africa/Dakar	2024-01-01

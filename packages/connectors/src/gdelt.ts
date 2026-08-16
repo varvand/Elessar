@@ -199,17 +199,17 @@ function parseRow(fields: string[]): ObservationDraft | null {
       avgTone,
       actor1: { name: actor1, country: fields[COL.actor1CountryCode] },
       actor2: { name: actor2, country: fields[COL.actor2CountryCode] },
-      actionGeo: { fullName: placeName, fipsCountryCode: fipsCountry, type: fields[COL.actionGeoType] },
+      actionGeo: {
+        fullName: placeName,
+        fipsCountryCode: fipsCountry,
+        type: fields[COL.actionGeoType],
+      },
       isRootEvent: fields[COL.isRootEvent] === '1',
     },
   };
 }
 
-function buildTitle(
-  actors: string[],
-  cameoLabel: string | null,
-  placeName: string | null,
-): string {
+function buildTitle(actors: string[], cameoLabel: string | null, placeName: string | null): string {
   const action = cameoLabel ?? 'Reported activity';
   const where = placeName ? ` in ${placeName}` : '';
 
@@ -302,11 +302,16 @@ export const gdeltEventsConnector: SourceDefinition = {
       ctx.log.warn({ malformed, stamp: lastUpdate.stamp }, 'skipped malformed GDELT rows');
     }
 
-    ctx.log.info(
-      { stamp: lastUpdate.stamp, kept: observations.length },
-      'GDELT batch parsed',
-    );
+    ctx.log.info({ stamp: lastUpdate.stamp, kept: observations.length }, 'GDELT batch parsed');
 
     return { observations, cursor: { stamp: lastUpdate.stamp } };
   },
+};
+
+export const __testing = {
+  parseRow,
+  parseLastUpdate,
+  precisionFromGeoType,
+  titleCase,
+  EXPECTED_COLUMNS,
 };

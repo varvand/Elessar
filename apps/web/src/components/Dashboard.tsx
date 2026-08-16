@@ -16,6 +16,10 @@ import { StatStrip } from './StatStrip';
 import { EventDetail } from './EventDetail';
 import { AlertsPanel } from './AlertsPanel';
 import { SourcesPanel } from './SourcesPanel';
+import { MarketFilterBar, type MarketFilterState } from './MarketFilterBar';
+import { MarketImpactFeed, type MarketImpactItem } from './market/MarketImpactFeed';
+import { MarketImpactSummary } from './market/MarketImpactSummary';
+import { deriveMarketImpact, deriveMarketImpacts } from '@/lib/market';
 
 /**
  * The dashboard.
@@ -43,6 +47,14 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 type RightRail = 'feed' | 'alerts' | 'sources';
+type DashboardView = 'situation' | 'markets';
+
+const DEFAULT_MARKET_FILTERS: MarketFilterState = {
+  channel: 'all',
+  minConfidence: 0,
+  hours: 24,
+  search: '',
+};
 
 export function Dashboard({
   initialEvents,
@@ -55,7 +67,9 @@ export function Dashboard({
   initialTimeline: TimelinePointDto[];
   initialAlerts: AlertDto[];
 }) {
+  const [view, setView] = useState<DashboardView>('situation');
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [marketFilters, setMarketFilters] = useState<MarketFilterState>(DEFAULT_MARKET_FILTERS);
   const [events, setEvents] = useState<EventDto[]>(initialEvents);
   const [stats, setStats] = useState<StatsDto | null>(initialStats);
   const [timeline, setTimeline] = useState<TimelinePointDto[]>(initialTimeline);
@@ -70,24 +84,27 @@ export function Dashboard({
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Debounce the search box so typing does not fire a query per keystroke.
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const activeSearch = view === 'markets' ? marketFilters.search : filters.search;
+  const [debouncedSearch, setDebouncedSearch] = useState(activeSearch);
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(filters.search), 300);
+    const timer = setTimeout(() => setDebouncedSearch(activeSearch), 300);
     return () => clearTimeout(timer);
-  }, [filters.search]);
+  }, [activeSearch]);
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
-    if (filters.groups.length !== STACK_ORDER.length) {
+    if (view === 'situation' && filters.groups.length !== STACK_ORDER.length) {
       params.set('groups', filters.groups.join(','));
     }
-    if (filters.minSeverity > 0) params.set('minSeverity', String(filters.minSeverity));
-    params.set('hours', String(filters.hours));
-    params.set('orderBy', filters.orderBy);
+    if (view === 'situation' && filters.minSeverity > 0) {
+      params.set('minSeverity', String(filters.minSeverity));
+    }
+    params.set('hours', String(view === 'markets' ? marketFilters.hours : filters.hours));
+    params.set('orderBy', view === 'markets' ? 'hotness' : filters.orderBy);
     params.set('limit', '600');
     if (debouncedSearch) params.set('search', debouncedSearch);
     return params.toString();
-  }, [filters.groups, filters.minSeverity, filters.hours, filters.orderBy, debouncedSearch]);
+  }, [view, filters, marketFilters.hours, debouncedSearch]);
 
   // Track the in-flight request so a slow response cannot overwrite a newer one.
   const requestIdRef = useRef(0);
@@ -158,6 +175,27 @@ export function Dashboard({
     return counts;
   }, [events]);
 
+  const marketImpacts = useMemo(() => deriveMarketImpacts(events), [events]);
+  const marketItems = useMemo<MarketImpactItem[]>(() => {
+    const byId = new Map(events.map((event) => [event.id, event]));
+    return marketImpacts
+      .filter(
+        (impact) =>
+          impact.confidence >= marketFilters.minConfidence &&
+          (marketFilters.channel === 'all' ||
+            impact.exposures.some((exposure) => exposure.channel === marketFilters.channel)),
+      )
+      .map((impact) => ({ event: byId.get(impact.eventId), impact }))
+      .filter((item): item is MarketImpactItem => item.event !== undefined);
+  }, [events, marketImpacts, marketFilters.channel, marketFilters.minConfidence]);
+  const marketEvents = useMemo(() => marketItems.map((item) => item.event), [marketItems]);
+
+  const changeView = useCallback((next: DashboardView) => {
+    setView(next);
+    setSelected(null);
+    setRail('feed');
+  }, []);
+
   const handleSelectRelated = useCallback(
     (eventId: string) => {
       const found = events.find((event) => event.id === eventId);
@@ -182,6 +220,8 @@ export function Dashboard({
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-plane">
       <TopBar
+        view={view}
+        onViewChange={changeView}
         stats={stats}
         loading={loading}
         lastUpdated={lastUpdated}
@@ -192,7 +232,11 @@ export function Dashboard({
       />
 
       <div className="border-b border-hairline bg-surface-1">
-        <FilterBar value={filters} onChange={setFilters} counts={groupCounts} />
+        {view === 'situation' ? (
+          <FilterBar value={filters} onChange={setFilters} counts={groupCounts} />
+        ) : (
+          <MarketFilterBar value={marketFilters} onChange={setMarketFilters} />
+        )}
       </div>
 
       {/* Main: globe + right rail. `min-h-0` is required for the children's
@@ -202,7 +246,7 @@ export function Dashboard({
         <main className="relative flex min-w-0 flex-1 flex-col gap-2 p-2">
           <section className="panel relative min-h-0 flex-1 overflow-hidden">
             <EventGlobe
-              events={events}
+              events={view === 'markets' ? marketEvents : events}
               selectedId={selected?.id ?? null}
               onSelect={setSelected}
               theme={theme}
@@ -212,62 +256,86 @@ export function Dashboard({
 
           <section className="panel shrink-0">
             <div className="panel-header">
-              <h2 className="eyebrow">Observation volume · last {formatWindow(filters.hours)}</h2>
+              <h2 className="eyebrow">
+                {view === 'situation'
+                  ? `Observation volume · last ${formatWindow(filters.hours)}`
+                  : `Impact channels · last ${formatWindow(marketFilters.hours)}`}
+              </h2>
               {/* `formatCount` instead of toLocaleString: locale-dependent
                   grouping separators differ between the server's locale and the
                   browser's, which is another hydration mismatch. */}
               <span className="eyebrow tabular">
-                {formatCount(timeline.reduce((sum, point) => sum + point.total, 0))} total
+                {view === 'situation'
+                  ? `${formatCount(timeline.reduce((sum, point) => sum + point.total, 0))} total`
+                  : `${formatCount(marketItems.length)} explainable events`}
               </span>
             </div>
-            <div className="px-2 pb-2 pt-1.5">
-              <TimelineChart
-                points={timeline}
-                activeGroups={filters.groups as CategoryGroupId[]}
-                hours={filters.hours}
-              />
-            </div>
+            {view === 'situation' ? (
+              <div className="px-2 pb-2 pt-1.5">
+                <TimelineChart
+                  points={timeline}
+                  activeGroups={filters.groups as CategoryGroupId[]}
+                  hours={filters.hours}
+                />
+              </div>
+            ) : (
+              <MarketImpactSummary impacts={marketItems.map((item) => item.impact)} />
+            )}
           </section>
         </main>
 
         {/* Right rail: tabbed, fixed width so the globe never reflows when the
             operator switches tabs. */}
         <aside className="flex w-[366px] shrink-0 flex-col border-l border-hairline bg-surface-1">
-          <div className="flex items-center gap-1 border-b border-hairline px-2 py-1.5">
-            {(
-              [
-                ['feed', 'Live feed', events.length],
-                ['alerts', 'Anomalies', alerts.length],
-                ['sources', 'Sources', null],
-              ] as const
-            ).map(([id, label, count]) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setRail(id)}
-                aria-pressed={rail === id}
-                className="btn"
-                data-active={rail === id}
-              >
-                {label}
-                {count !== null && (
-                  <span className="text-ink-muted tabular">{count}</span>
-                )}
-              </button>
-            ))}
-          </div>
+          {view === 'situation' ? (
+            <div className="flex items-center gap-1 border-b border-hairline px-2 py-1.5">
+              {(
+                [
+                  ['feed', 'Live feed', events.length],
+                  ['alerts', 'Anomalies', alerts.length],
+                  ['sources', 'Sources', null],
+                ] as const
+              ).map(([id, label, count]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setRail(id)}
+                  aria-pressed={rail === id}
+                  className="btn"
+                  data-active={rail === id}
+                >
+                  {label}
+                  {count !== null && <span className="text-ink-muted tabular">{count}</span>}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
+              <span className="eyebrow">Potential market impact</span>
+              <span className="eyebrow tabular">{marketItems.length}</span>
+            </div>
+          )}
 
           <div className="min-h-0 flex-1 overflow-y-auto">
-            {rail === 'feed' && (
+            {view === 'markets' ? (
+              <MarketImpactFeed
+                items={marketItems}
+                selectedId={selected?.id ?? null}
+                onSelect={setSelected}
+                loading={loading}
+              />
+            ) : rail === 'feed' ? (
               <EventFeed
                 events={events}
                 selectedId={selected?.id ?? null}
                 onSelect={setSelected}
                 loading={loading}
               />
+            ) : rail === 'alerts' ? (
+              <AlertsPanel alerts={alerts} loading={loading} />
+            ) : (
+              <SourcesPanel />
             )}
-            {rail === 'alerts' && <AlertsPanel alerts={alerts} loading={loading} />}
-            {rail === 'sources' && <SourcesPanel />}
           </div>
         </aside>
 
@@ -280,6 +348,8 @@ export function Dashboard({
           <div className="absolute inset-y-0 right-0 z-30 w-[400px] border-l border-hairline shadow-[var(--shadow-panel)]">
             <EventDetail
               event={selected}
+              marketImpact={deriveMarketImpact(selected)}
+              marketExpanded={view === 'markets'}
               onClose={() => setSelected(null)}
               onSelectRelated={handleSelectRelated}
             />
@@ -291,6 +361,8 @@ export function Dashboard({
 }
 
 function TopBar({
+  view,
+  onViewChange,
   stats,
   loading,
   lastUpdated,
@@ -299,6 +371,8 @@ function TopBar({
   onToggleTheme,
   onRefresh,
 }: {
+  view: DashboardView;
+  onViewChange: (view: DashboardView) => void;
   stats: StatsDto | null;
   loading: boolean;
   lastUpdated: Date | null;
@@ -311,9 +385,7 @@ function TopBar({
   const [clock, setClock] = useState<string>('');
   useEffect(() => {
     const tick = () =>
-      setClock(
-        new Date().toLocaleTimeString('en-GB', { timeZone: 'UTC', hour12: false }) + 'Z',
-      );
+      setClock(new Date().toLocaleTimeString('en-GB', { timeZone: 'UTC', hour12: false }) + 'Z');
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
@@ -328,9 +400,31 @@ function TopBar({
             Elessar
           </div>
           <div className="mt-0.5 text-[9.5px] uppercase tracking-[0.14em] text-ink-muted">
-            Situational Awareness
+            {view === 'situation' ? 'Situational Awareness' : 'Market Lens'}
           </div>
         </div>
+      </div>
+
+      <span className="h-7 w-px bg-[var(--line-hairline)]" aria-hidden />
+
+      <div className="flex items-center gap-1" aria-label="Dashboard view">
+        {(
+          [
+            ['situation', 'Situation'],
+            ['markets', 'Markets'],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onViewChange(id)}
+            aria-pressed={view === id}
+            className="btn"
+            data-active={view === id}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <span className="h-7 w-px bg-[var(--line-hairline)]" aria-hidden />
@@ -367,7 +461,14 @@ function TopBar({
         <span className="mono text-[11px] text-ink-secondary">{clock}</span>
 
         <button type="button" onClick={onRefresh} className="btn" title="Refresh now">
-          <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
+          <svg
+            viewBox="0 0 16 16"
+            className="h-3 w-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            aria-hidden
+          >
             <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" strokeLinecap="round" />
             <path d="M13.5 2v3h-3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -396,10 +497,23 @@ function Wordmark() {
   return (
     <svg viewBox="0 0 28 28" className="h-7 w-7" aria-hidden>
       <circle cx="14" cy="14" r="12.5" fill="none" stroke="var(--line-strong)" strokeWidth="1" />
-      <circle cx="14" cy="14" r="8.5" fill="none" stroke="var(--group-governance)" strokeWidth="1" opacity="0.55" />
+      <circle
+        cx="14"
+        cy="14"
+        r="8.5"
+        fill="none"
+        stroke="var(--group-governance)"
+        strokeWidth="1"
+        opacity="0.55"
+      />
       <circle cx="14" cy="14" r="4.5" fill="var(--group-governance)" opacity="0.16" />
       <circle cx="14" cy="14" r="2" fill="var(--sev-elevated)" />
-      <path d="M14 1.5v3M14 23.5v3M1.5 14h3M23.5 14h3" stroke="var(--line-strong)" strokeWidth="1" strokeLinecap="round" />
+      <path
+        d="M14 1.5v3M14 23.5v3M1.5 14h3M23.5 14h3"
+        stroke="var(--line-strong)"
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

@@ -310,9 +310,13 @@ export function priorStrengthFor(sourceId: string): 'authoritative' | 'weak' | '
     case 'nws.alerts':
     case 'firms.fires':
     case 'nasa.eonet':
+    case 'noaa.swpc':
+    case 'us.ofac':
       return 'authoritative';
-    // GDELT's CAMEO root mapping is a real signal but a coarse one.
+    // GDELT's CAMEO mapping and ReliefWeb's structured metadata are useful but
+    // coarse, so they should guide rather than override classification.
     case 'gdelt.events':
+    case 'ocha.reliefweb':
       return 'weak';
     default:
       return 'none';

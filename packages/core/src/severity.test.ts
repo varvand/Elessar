@@ -38,6 +38,7 @@ describe('intensityFor', () => {
       'nws.alerts',
       'firms.fires',
       'nasa.eonet',
+      'noaa.swpc',
     ]) {
       for (const magnitude of [-1000, -10, 0, 1, 10, 1e6]) {
         const value = intensityFor(sourceId, magnitude);

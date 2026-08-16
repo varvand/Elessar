@@ -27,13 +27,7 @@ import { CATEGORY_LABELS, type EventCategory } from '@elessar/core/taxonomy';
  * identity is carried by the text label everywhere it appears. Colour tells you
  * *what kind* of thing at a glance; the label tells you exactly what.
  */
-export const CATEGORY_GROUP_IDS = [
-  'governance',
-  'security',
-  'human',
-  'domain',
-  'hazard',
-] as const;
+export const CATEGORY_GROUP_IDS = ['governance', 'security', 'human', 'domain', 'hazard'] as const;
 
 export type CategoryGroupId = (typeof CATEGORY_GROUP_IDS)[number];
 
@@ -249,10 +243,18 @@ export function sourceShortName(sourceId: string): string {
       return 'NASA';
     case 'firms':
       return 'FIRMS';
+    case 'noaa':
+      return 'NOAA SWPC';
+    case 'ocha':
+      return 'ReliefWeb';
+    case 'us':
+      return rest === 'ofac' ? 'OFAC' : sourceId;
     case 'rss':
       return (rest ?? '')
         .split('-')
-        .map((part) => (part.length <= 3 ? part.toUpperCase() : part[0]!.toUpperCase() + part.slice(1)))
+        .map((part) =>
+          part.length <= 3 ? part.toUpperCase() : part[0]!.toUpperCase() + part.slice(1),
+        )
         .join(' ');
     default:
       return sourceId;

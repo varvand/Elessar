@@ -33,12 +33,7 @@ interface TimelineChartProps {
 
 const PADDING = { top: 10, right: 8, bottom: 20, left: 34 };
 
-export function TimelineChart({
-  points,
-  activeGroups,
-  hours,
-  height = 132,
-}: TimelineChartProps) {
+export function TimelineChart({ points, activeGroups, hours, height = 132 }: TimelineChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(760);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -95,14 +90,10 @@ export function TimelineChart({
               style={{ background: CATEGORY_GROUP_VAR[group] }}
               aria-hidden
             />
-            <span className="text-[10.5px] text-ink-secondary">
-              {CATEGORY_GROUP_LABELS[group]}
-            </span>
+            <span className="text-[10.5px] text-ink-secondary">{CATEGORY_GROUP_LABELS[group]}</span>
           </span>
         ))}
-        <span className="ml-auto eyebrow tabular">
-          peak {maxTotal}/bucket
-        </span>
+        <span className="ml-auto eyebrow tabular">peak {maxTotal}/bucket</span>
       </div>
 
       <div ref={measure} className="relative min-h-0 flex-1">
@@ -260,11 +251,13 @@ function TimelineTooltip({
       style={{ left, width: TOOLTIP_WIDTH }}
     >
       <div className="eyebrow tabular">
-        {time.toLocaleString(undefined, {
+        {time.toLocaleString('en-GB', {
           month: 'short',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
+          hour12: false,
+          timeZone: 'UTC',
         })}
       </div>
       {present.length === 0 ? (
@@ -322,10 +315,7 @@ function niceTicks(max: number, count: number): number[] {
 }
 
 /** Roughly six evenly spaced time labels, formatted for the window's length. */
-function timeTicks(
-  points: TimelinePointDto[],
-  hours: number,
-): { index: number; label: string }[] {
+function timeTicks(points: TimelinePointDto[], hours: number): { index: number; label: string }[] {
   if (points.length === 0) return [];
 
   const target = 6;
@@ -340,8 +330,17 @@ function timeTicks(
     ticks.push({
       index,
       label: showDate
-        ? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-        : date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
+        ? date.toLocaleDateString('en-GB', {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC',
+          })
+        : date.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'UTC',
+          }),
     });
   }
   return ticks;
